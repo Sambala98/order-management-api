@@ -31,13 +31,13 @@ This project demonstrates real-world backend engineering practices including aut
 
 ---
 
-## 🏗 System Architecture
+##  System Architecture
 
 ```mermaid
 flowchart LR
-    Client -->|HTTP Request| FastAPI
-    FastAPI -->|SQLAlchemy ORM| PostgreSQL
-    FastAPI -->|JWT Authentication| Protected Routes
+    Client[Client] -->|HTTP Request| API[FastAPI]
+    API -->|SQLAlchemy ORM| DB[(PostgreSQL)]
+    API -->|JWT Auth| PR[Protected Routes]
 ```
 
 ---
