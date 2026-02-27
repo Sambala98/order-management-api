@@ -155,7 +155,24 @@ GitHub Actions automatically:
 
 ## Roadmap
 
+
 - Add Redis caching
-- Add Role-Based Access Control
-- Add API rate limiting
-- Add production deployment (Render / Fly.io)
+- Add Order status lifecycle (PENDING → SHIPPED → DELIVERED)
+- Add async background tasks (Celery / RQ)
+- Add Kubernetes deployment
+
+
+## Production Considerations
+
+This project incorporates backend engineering best practices:
+
+- Stateless JWT-based authentication
+- Role-Based Access Control (RBAC)
+- Search and pagination for scalable queries
+- Rate limiting to prevent brute-force login attacks
+- Environment-based configuration management
+- Version-controlled database schema migrations (Alembic)
+- Containerized deployment using Docker Compose
+- Automated test validation through CI pipeline
+
+These patterns reflect real-world backend systems used in production environments.
