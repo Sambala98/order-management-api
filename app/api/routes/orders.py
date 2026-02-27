@@ -5,10 +5,11 @@ from sqlalchemy import select
 
 from app.db.session import get_db
 from app.db.models import Order, User
-from app.schemas.orders import OrderCreate, OrderOut
+from app.schemas.orders import OrderCreate, OrderOut, OrderStatusUpdate
 from app.core.security import decode_access_token
 from typing import Optional
 from sqlalchemy import select, or_
+
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 bearer = HTTPBearer()
@@ -60,6 +61,7 @@ def create_order(
     db.commit()
     db.refresh(order)
     return order
+
 
 
 @router.get("", response_model=list[OrderOut])
@@ -135,6 +137,28 @@ def get_order(
     if current_user.role != "admin" and order.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not allowed")
 
+    return order
+
+@router.patch("/{order_id}", response_model=OrderOut)
+def update_order_status(
+    order_id: int,
+    payload: OrderStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    order = db.scalar(select(Order).where(Order.id == order_id))
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    is_owner = order.user_id == current_user.id
+    is_admin = current_user.role == "admin"
+
+    if not (is_owner or is_admin):
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    order.status = payload.status.value
+    db.commit()
+    db.refresh(order)
     return order
 
 
