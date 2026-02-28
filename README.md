@@ -1,3 +1,5 @@
+![CI](https://github.com/Sambala98/order-management-api/actions/workflows/ci.yml/badge.svg)
+
 # Order Management API
 
 A production-ready backend API built using **FastAPI** and **PostgreSQL** with JWT authentication, Docker containerization, automated testing, and CI pipeline integration.
