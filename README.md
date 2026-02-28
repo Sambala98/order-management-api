@@ -190,6 +190,26 @@ GitHub Actions automatically:
 - Runs tests
 - Validates pull requests
 
+## Environment Setup
+
+1️ Copy example environment file:
+
+```bash
+cp .env.example .env
+```
+
+For Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+2️ Update `.env` values if needed:
+
+- DATABASE_URL
+- JWT_SECRET
+- ACCESS_TOKEN_EXPIRE_MINUTES
+
 ---
 
 ## Roadmap
