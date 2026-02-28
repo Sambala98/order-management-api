@@ -19,6 +19,43 @@ This project demonstrates real-world backend engineering practices including aut
 - Pytest Unit Tests
 - GitHub Actions CI Pipeline
 
+
+## Example API Usage
+
+### 1️ Register User
+
+```bash
+curl -X POST http://localhost:8000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","password":"123456"}'
+```
+
+### 2️ Login User
+
+```bash
+curl -X POST http://localhost:8000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","password":"123456"}'
+```
+
+### 3️ Create Order (JWT Required)
+
+```bash
+curl -X POST http://localhost:8000/orders \
+  -H "Authorization: Bearer <PASTE_YOUR_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"customer_name":"Sudheer","item_name":"Keyboard","quantity":2}'
+```
+
+### 4️ Update Order Status
+
+```bash
+curl -X PATCH http://localhost:8000/orders/1 \
+  -H "Authorization: Bearer <PASTE_YOUR_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"SHIPPED"}'
+```
+
 ---
 ##  Tech Stack
 
