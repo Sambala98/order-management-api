@@ -45,4 +45,8 @@ jobs:
         run: alembic upgrade head
 
       - name: Run tests
-        run: pytest -q
+      env:
+        JWT_SECRET: testsecret
+        DATABASE_URL: postgresql+psycopg2://postgres:postgres@localhost:5432/ordersdb
+        ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+      run: pytest -q
