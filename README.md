@@ -2,9 +2,9 @@
 
 # Order Management API
 
-A production-ready **FastAPI backend** demonstrating authentication, RBAC, database migrations, Dockerization, automated testing, and CI/CD integration.
+A production-style **FastAPI backend** demonstrating authentication, RBAC, database migrations, Dockerization, automated testing, and CI/CD integration.
 
-This project reflects real-world backend engineering practices used in production systems.
+This project demonstrates practical backend engineering patterns used in real-world API systems.
 
 ---
 
@@ -263,3 +263,52 @@ This project incorporates backend engineering best practices:
 - Automated test validation through CI pipeline
 
 These patterns reflect real-world backend systems used in production environments.
+
+---
+
+## AWS EC2 Deployment
+
+This project was deployed on an AWS EC2 Amazon Linux 2023 instance using a cost-conscious AWS setup.
+
+### Deployment Architecture
+
+Browser or API Client -> Nginx on port 80 -> FastAPI with Uvicorn on port 8000 -> PostgreSQL on EC2
+
+### AWS Deployment Components
+
+- EC2: Hosted the backend application on Amazon Linux 2023
+- Nginx: Reverse proxy forwarding public HTTP traffic from port 80 to FastAPI on port 8000
+- systemd: Managed FastAPI as a background service with automatic restart
+- PostgreSQL: Installed locally on the EC2 instance for a cost-conscious database setup
+- Alembic: Applied database migrations and created users, orders, and alembic_version tables
+- Environment Variables: Used .env for DATABASE_URL and JWT_SECRET
+
+### EC2 Service Checks
+
+sudo systemctl status nginx
+sudo systemctl status postgresql
+sudo systemctl status fastapi
+
+### Health Check
+
+curl http://127.0.0.1:8000/health
+
+Expected response:
+
+{"status":"ok"}
+
+### Swagger UI
+
+http://<EC2_PUBLIC_IP>/docs
+
+### Verified API Flow
+
+1. GET /health returned 200 OK
+2. POST /auth/register created a user
+3. POST /auth/login returned a JWT access token
+4. POST /orders created an order using Bearer token authorization
+5. GET /orders returned the saved order from PostgreSQL
+
+### Deployment Notes
+
+This deployment demonstrates a cost-conscious AWS backend deployment using EC2, Nginx, systemd, PostgreSQL, and Alembic migrations. The setup validates a complete API workflow including authentication, JWT authorization, order creation, and database persistence. Future improvements include HTTPS, domain configuration, centralized secrets management, automated deployment, and expanded monitoring.
