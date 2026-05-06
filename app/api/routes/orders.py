@@ -7,6 +7,7 @@ from app.db.session import get_db
 from app.db.models import Order, User
 from app.schemas.orders import OrderCreate, OrderOut, OrderStatusUpdate, OrderStatus
 from app.core.security import decode_access_token
+from app.tasks.notifications import send_order_notification
 from typing import Optional
 from sqlalchemy import select, or_
 
@@ -60,8 +61,12 @@ def create_order(
     db.add(order)
     db.commit()
     db.refresh(order)
+    send_order_notification.delay(
+       order.id,
+       order.customer_name,
+       order.item_name,
+)
     return order
-
 
 
 @router.get("", response_model=list[OrderOut])

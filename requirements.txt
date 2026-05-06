@@ -13,3 +13,5 @@ pytest-asyncio
 httpx
 slowapi==0.1.9
 alembic
+celery
+redis
