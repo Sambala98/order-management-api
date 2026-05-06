@@ -5,7 +5,7 @@ from sqlalchemy import select
 
 from app.db.session import get_db
 from app.db.models import Order, User
-from app.schemas.orders import OrderCreate, OrderOut, OrderStatusUpdate
+from app.schemas.orders import OrderCreate, OrderOut, OrderStatusUpdate, OrderStatus
 from app.core.security import decode_access_token
 from typing import Optional
 from sqlalchemy import select, or_
@@ -138,7 +138,24 @@ def get_order(
         raise HTTPException(status_code=403, detail="Not allowed")
 
     return order
+def validate_status_transition(current_status: str, new_status: OrderStatus) -> None:
+    allowed_transitions = {
+        "PENDING": {"PROCESSING", "CANCELLED"},
+        "PROCESSING": {"SHIPPED", "CANCELLED"},
+        "SHIPPED": {"DELIVERED"},
+        "DELIVERED": set(),
+        "CANCELLED": set(),
+    }
 
+    allowed_next_statuses = allowed_transitions.get(current_status, set())
+
+    if new_status.value not in allowed_next_statuses:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid status transition from {current_status} to {new_status.value}",
+        )
+
+@router.patch("/{order_id}", response_model=OrderOut)
 @router.patch("/{order_id}", response_model=OrderOut)
 def update_order_status(
     order_id: int,
@@ -155,6 +172,8 @@ def update_order_status(
 
     if not (is_owner or is_admin):
         raise HTTPException(status_code=403, detail="Not authorized")
+
+    validate_status_transition(order.status, payload.status)
 
     order.status = payload.status.value
     db.commit()

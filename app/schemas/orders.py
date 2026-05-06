@@ -4,8 +4,10 @@ from enum import Enum
 
 class OrderStatus(str, Enum):
     PENDING = "PENDING"
+    PROCESSING = "PROCESSING"
     SHIPPED = "SHIPPED"
     DELIVERED = "DELIVERED"
+    CANCELLED = "CANCELLED"
 
 
 class OrderCreate(BaseModel):
@@ -23,7 +25,7 @@ class OrderOut(BaseModel):
     customer_name: str
     item_name: str
     quantity: int
-    status: OrderStatus  
+    status: OrderStatus
 
     class Config:
         from_attributes = True
