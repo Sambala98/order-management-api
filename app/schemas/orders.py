@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from enum import Enum
+from datetime import datetime
 
 
 class OrderStatus(str, Enum):
@@ -26,6 +27,17 @@ class OrderOut(BaseModel):
     item_name: str
     quantity: int
     status: OrderStatus
+
+    class Config:
+        from_attributes = True
+class OrderEventOut(BaseModel):
+    id: int
+    order_id: int
+    changed_by_user_id: int
+    old_status: str
+    new_status: str
+    note: str | None = None
+    created_at: datetime
 
     class Config:
         from_attributes = True

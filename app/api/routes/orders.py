@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 from app.db.session import get_db
-from app.db.models import Order, User
-from app.schemas.orders import OrderCreate, OrderOut, OrderStatusUpdate, OrderStatus
+from app.db.models import Order, User, OrderEvent
+from app.schemas.orders import OrderCreate, OrderOut, OrderStatusUpdate, OrderStatus, OrderEventOut
 from app.core.security import decode_access_token
 from app.tasks.notifications import send_order_notification
 from typing import Optional
@@ -38,7 +38,7 @@ def get_current_user(
 
 
 def require_admin(current_user: User = Depends(get_current_user)) -> User:
-    if current_user.role != "admin":
+    if current_user.role != "ADMIN":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required",
@@ -92,7 +92,7 @@ def list_orders(
     stmt = select(Order)
 
     # RBAC filter
-    if current_user.role != "admin":
+    if current_user.role != "ADMIN":
         stmt = stmt.where(Order.user_id == current_user.id)
 
     # Search filter
@@ -139,7 +139,7 @@ def get_order(
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    if current_user.role != "admin" and order.user_id != current_user.id:
+    if current_user.role != "ADMIN" and order.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not allowed")
 
     return order
@@ -159,12 +159,39 @@ def validate_status_transition(current_status: str, new_status: OrderStatus) -> 
             status_code=400,
             detail=f"Invalid status transition from {current_status} to {new_status.value}",
         )
-
-@router.patch("/{order_id}", response_model=OrderOut)
 @router.patch("/{order_id}", response_model=OrderOut)
 def update_order_status(
     order_id: int,
     payload: OrderStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    order = db.scalar(select(Order).where(Order.id == order_id))
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    old_status = order.status
+
+    validate_status_transition(old_status, payload.status)
+
+    order.status = payload.status.value
+
+    event = OrderEvent(
+        order_id=order.id,
+        changed_by_user_id=current_user.id,
+        old_status=old_status,
+        new_status=payload.status.value,
+        note=f"Order status changed from {old_status} to {payload.status.value}",
+    )
+
+    db.add(event)
+    db.commit()
+    db.refresh(order)
+
+    return order
+@router.get("/{order_id}/events", response_model=list[OrderEventOut])
+def get_order_events(
+    order_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -173,18 +200,18 @@ def update_order_status(
         raise HTTPException(status_code=404, detail="Order not found")
 
     is_owner = order.user_id == current_user.id
-    is_admin = current_user.role == "admin"
+    is_admin = current_user.role == "ADMIN"
 
     if not (is_owner or is_admin):
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    validate_status_transition(order.status, payload.status)
+    events = db.scalars(
+        select(OrderEvent)
+        .where(OrderEvent.order_id == order_id)
+        .order_by(OrderEvent.created_at.desc())
+    ).all()
 
-    order.status = payload.status.value
-    db.commit()
-    db.refresh(order)
-    return order
-
+    return list(events)
 
 @router.delete("/{order_id}", status_code=204)
 def delete_order(

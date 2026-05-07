@@ -10,8 +10,17 @@ from slowapi import _rate_limit_exceeded_handler
 
 from app.api.routes.auth import router as auth_router
 from app.api.routes.orders import router as orders_router
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title=settings.APP_NAME)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 setup_logging()
 app.middleware("http")(request_logging_middleware)
