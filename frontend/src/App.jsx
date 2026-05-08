@@ -38,6 +38,22 @@ function App() {
     }
   };
 
+  const register = async (e) => {
+    e.preventDefault();
+
+    try {
+      await API.post("/auth/register", {
+        email: email,
+        password: password,
+      });
+
+      alert("Registration successful. Now login.");
+    } catch (error) {
+      alert("Registration failed");
+      console.log(error.response?.data || error);
+    }
+  };
+
   const fetchOrders = async () => {
     try {
       const response = await API.get("/orders");
@@ -117,9 +133,9 @@ function App() {
 
       {!isLoggedIn ? (
         <div>
-          <h2>Login</h2>
+          <h2>Login / Register</h2>
 
-          <form onSubmit={login}>
+          <form>
             <input
               type="email"
               placeholder="Enter email"
@@ -134,14 +150,18 @@ function App() {
               onChange={(e) => setPassword(e.target.value)}
             />
 
-            <button type="submit">Login</button>
+            <button type="button" onClick={login}>
+              Login
+            </button>
+
+            <button type="button" onClick={register}>
+              Register
+            </button>
           </form>
         </div>
       ) : (
         <div>
           <button onClick={logout}>Logout</button>
-
-          <h2>Logged in as: {userRole}</h2>
 
           <h2>Create Order</h2>
 
