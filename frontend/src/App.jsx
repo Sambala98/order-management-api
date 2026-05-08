@@ -202,7 +202,7 @@ function App() {
                 <th>Item</th>
                 <th>Quantity</th>
                 <th>Status</th>
-                <th>Actions</th>
+                {userRole === "ADMIN" && <th>Actions</th>}
               </tr>
             </thead>
 
@@ -217,9 +217,10 @@ function App() {
                     <td>{order.item_name}</td>
                     <td>{order.quantity}</td>
                     <td>{order.status}</td>
-                    <td>
-                      {userRole === "ADMIN" ? (
-                        nextStatus ? (
+
+                    {userRole === "ADMIN" && (
+                      <td>
+                        {nextStatus ? (
                           <button
                             onClick={() =>
                               updateOrderStatus(order.id, nextStatus)
@@ -229,11 +230,9 @@ function App() {
                           </button>
                         ) : (
                           <span>Completed</span>
-                        )
-                      ) : (
-                        <span>View only</span>
-                      )}
-                    </td>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 );
               })}
