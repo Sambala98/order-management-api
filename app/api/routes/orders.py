@@ -7,7 +7,7 @@ from app.db.session import get_db
 from app.db.models import Order, User, OrderEvent
 from app.schemas.orders import OrderCreate, OrderOut, OrderStatusUpdate, OrderStatus, OrderEventOut
 from app.core.security import decode_access_token
-from app.tasks.notifications import send_order_notification
+#from app.tasks.notifications import send_order_notification
 from typing import Optional
 from sqlalchemy import select, or_
 
@@ -58,17 +58,12 @@ def create_order(
         quantity=payload.quantity,
         user_id=current_user.id,
     )
+
     db.add(order)
     db.commit()
     db.refresh(order)
-    try:
-      send_order_notification.delay(
-        order.id,
-        order.item_name,
-        order.quantity
-    )
-    except Exception as e:
-         print(f"Notification task failed: {e}")
+
+    return order
 
 @router.get("", response_model=list[OrderOut])
 def list_orders(
