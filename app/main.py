@@ -18,7 +18,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "https://order-management-api.vercel.app",,
+        "https://order-management-api-eta.vercel.app",
         ],
     allow_credentials=True,
     allow_methods=["*"],
