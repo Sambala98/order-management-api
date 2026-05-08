@@ -16,7 +16,10 @@ app = FastAPI(title=settings.APP_NAME)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "https://order-management-api.vercel.app",,
+        ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
