@@ -61,13 +61,14 @@ def create_order(
     db.add(order)
     db.commit()
     db.refresh(order)
-    send_order_notification.delay(
-       order.id,
-       order.customer_name,
-       order.item_name,
-)
-    return order
-
+    try:
+      send_order_notification.delay(
+        order.id,
+        order.item_name,
+        order.quantity
+    )
+    except Exception as e:
+         print(f"Notification task failed: {e}")
 
 @router.get("", response_model=list[OrderOut])
 def list_orders(
